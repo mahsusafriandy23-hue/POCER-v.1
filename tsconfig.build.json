@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts", "prisma/seed.ts", "web", "web-internal", "web-admin", "web-agent"]
+}

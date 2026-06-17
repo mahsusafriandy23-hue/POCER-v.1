@@ -1,0 +1,15 @@
+# Local, isolated Postgres for development. Not for production.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: voucher-platform-db
+    environment:
+      POSTGRES_USER: voucher
+      POSTGRES_PASSWORD: voucher
+      POSTGRES_DB: voucher_platform
+    ports:
+      - "5432:5432"
+    volumes:
+      - voucher_pgdata:/var/lib/postgresql/data
+volumes:
+  voucher_pgdata:

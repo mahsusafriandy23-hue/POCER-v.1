@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.env
+*.log
+scripts/mock-*.js
+web
+web-internal
+web-admin
+web-agent

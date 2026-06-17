@@ -1,0 +1,645 @@
+// Voucher Platform — Prisma schema (PostgreSQL)
+// Greenfield mirror of PENANGGAK NET. Preserves existing business rules & data model
+// (see /root/vm102-analysis/docs/DATABASE_STRUCTURE.md) but cleaned for the new system.
+// Isolated from production: this is a fresh DB, no connection to VM102.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Enums ─────────────────────────
+
+// Legacy transactions.status (UNPAID/PAID/EXPIRED/FAILED) — preserved.
+enum OrderStatus {
+  UNPAID
+  PAID
+  EXPIRED
+  FAILED
+}
+
+// Legacy transactions.fulfill_status (null/created/failed). PENDING replaces null.
+enum FulfillStatus {
+  PENDING
+  CREATED
+  FAILED
+}
+
+// Legacy transactions.purpose (voucher / agent_topup).
+enum OrderPurpose {
+  VOUCHER
+  AGENT_TOPUP
+  CUSTOMER_TOPUP
+}
+
+// How an order is funded. Retail = QRIS; agent may pay from wallet balance.
+enum FundingSource {
+  QRIS
+  WALLET
+}
+
+// Gateway-side payment status (qris.transactions.status).
+enum PaymentStatus {
+  PENDING
+  PAID
+  EXPIRED
+}
+
+// ───────────────────────── Catalog (D1) ─────────────────────────
+
+/// A MikroTik hotspot location/router. Mirrors legacy `servers`.
+/// NOTE: router credentials are intentionally NOT stored here in the mirror;
+/// secrets are externalized (see CURRENT_WEAKNESSES S1/S4). Fields kept nullable
+/// so a future RouterOS ACL can resolve them from a vault by `code`.
+model Server {
+  id              Int      @id @default(autoincrement())
+  code            String   @unique
+  name            String
+  mikrotikIp      String?  @map("mikrotik_ip")
+  mikrotikPort    Int      @default(8728) @map("mikrotik_port")
+  mikrotikUser    String?  @map("mikrotik_user")
+  mikrotikPassEnc String?  @map("mikrotik_pass_enc") // AES-256-GCM encrypted (never plaintext)
+  dnsName         String?  @map("dns_name")
+  // Outlet geolocation for "nearest outlet" auto-selection in the storefront.
+  latitude        Float?
+  longitude       Float?
+  serviceRadiusKm Float?   @map("service_radius_km") // coverage radius (km) for in-range checks
+  isActive        Boolean  @default(true) @map("is_active")
+  showInDashboard Boolean  @default(true) @map("show_in_dashboard")
+  sortOrder       Int      @default(0) @map("sort_order")
+  // Voucher credential generation style (per-outlet; must match the router's hotspot login mode).
+  voucherCharset  String   @default("numeric") @map("voucher_charset") // "numeric" (angka semua) | "alphanumeric" (campuran)
+  voucherUserMode String   @default("USER_PASS") @map("voucher_user_mode") // "USER_PASS" (user≠pass) | "USER_EQ_PASS" (user=pass)
+  voucherLength   Int      @default(6) @map("voucher_length") // code length per field (4–12)
+  ownerAdminId    Int?     @map("owner_admin_id") // the Owner who manages this outlet (platform-assigned)
+  brandId         Int?     @map("brand_id") // the Brand this outlet belongs to (determines its QRIS)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  qrisAccountId   Int?     @map("qris_account_id") // which QRIS receives this outlet's payments
+
+  packages     Package[]
+  orders       Order[]
+  ownerAdmin   Admin?        @relation(fields: [ownerAdminId], references: [id], onDelete: SetNull)
+  brand        Brand?        @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  qrisAccount  QrisAccount?  @relation(fields: [qrisAccountId], references: [id], onDelete: SetNull)
+  agentOutlets AgentOutlet[]
+  assistantOutlets AssistantOutlet[]
+
+  @@index([ownerAdminId])
+  @@index([brandId])
+  @@index([qrisAccountId])
+  @@map("servers")
+}
+
+/// A sellable plan. Mirrors legacy `voucher_packages`.
+/// `mikrotikProfile` is the real capability (speed/quota/validity). BR-1, BR-2.
+model Package {
+  id              Int      @id @default(autoincrement())
+  serverId        Int?     @map("server_id")
+  name            String
+  description     String?
+  price           Int // retail price (the price the customer pays), integer rupiah
+  agentPrice      Int?     @map("agent_price")
+  // Promo/marketing display (admin-controlled). When originalPrice > price the
+  // storefront shows a strike-through original + computed discount %.
+  originalPrice   Int?     @map("original_price")
+  promoLabel      String?  @map("promo_label") // top badge, e.g. "Flash Sale", "Promo"
+  bonusLabel      String?  @map("bonus_label") // bottom gift line, e.g. "Bonus kuota malam"
+  isFlashSale     Boolean  @default(false) @map("is_flash_sale")
+  footerNote      String?  @map("footer_note") // custom text shown in card footer (ticket-style)
+  duration        String // e.g. "1h","2d","30d" (display + expiry hint)
+  dataLimit       String?  @map("data_limit")
+  mikrotikProfile String   @map("mikrotik_profile")
+  isActive        Boolean  @default(true) @map("is_active")
+  isBundle        Boolean  @default(false) @map("is_bundle")
+  color           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  server Server? @relation(fields: [serverId], references: [id], onDelete: SetNull)
+  orders Order[]
+  agentPrices AgentPackagePrice[]
+
+  @@index([serverId])
+  @@index([isActive])
+  @@map("packages")
+}
+
+/// An agent's own selling price for a package (their markup to the end customer).
+/// The owner sets the agent's COST (Package.agentPrice); the agent sets what they
+/// resell it for. Absent row → agent uses the package retail price as default.
+model AgentPackagePrice {
+  id        Int      @id @default(autoincrement())
+  agentId   Int      @map("agent_id")
+  packageId Int      @map("package_id")
+  sellPrice Int      @map("sell_price") // integer rupiah; enforced >= agent cost
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  agent   Agent   @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, packageId])
+  @@index([agentId])
+  @@map("agent_package_prices")
+}
+
+// ───────────────────────── Ordering (D2) ─────────────────────────
+
+/// The order aggregate root. Mirrors legacy `transactions`.
+/// Lifecycle: status (UNPAID->PAID->EXPIRED/FAILED) × fulfillStatus. See
+/// FUNCTIONAL_SPECIFICATION §3 and BR-5..BR-9, BR-15..BR-20.
+model Order {
+  id        Int    @id @default(autoincrement())
+  /// Stable merchant reference, server-generated: "WIFI-<ts>-<rand>". BR-5.
+  merchantRef String @unique @map("merchant_ref")
+  /// Payment-provider reference (e.g. "INV-..."); set after payment created. BR-7.
+  reference String? @unique
+
+  packageId  Int?         @map("package_id")
+  serverId   Int?         @map("server_id")
+  agentId    Int?         @map("agent_id")
+  customerId Int?         @map("customer_id")
+  purpose   OrderPurpose  @default(VOUCHER)
+  fundingSource FundingSource @default(QRIS) @map("funding_source")
+  qty       Int           @default(1)
+
+  customerWhatsapp String @map("customer_whatsapp")
+
+  // Amounts (integer rupiah). amount mirrors legacy `amount` (becomes total after payment).
+  amount         Int
+  originalAmount Int? @map("original_amount")
+  totalAmount    Int? @map("total_amount")
+
+  paymentMethod String? @default("QRIS") @map("payment_method")
+  checkoutUrl   String? @map("checkout_url")
+
+  status        OrderStatus   @default(UNPAID)
+  fulfillStatus FulfillStatus @default(PENDING) @map("fulfill_status")
+
+  // Pre-generated voucher credentials (BR-6). Kept for fulfillment determinism.
+  voucherUsername String? @map("voucher_username")
+  voucherPassword String? @map("voucher_password")
+
+  fulfillAttempts Int     @default(0) @map("fulfill_attempts")
+  fulfillError    String? @map("fulfill_error")
+  waSent          Boolean @default(false) @map("wa_sent")
+
+  paidAt      DateTime? @map("paid_at")
+  expiresAt   DateTime? @map("expires_at")
+  fulfilledAt DateTime? @map("fulfilled_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  package  Package?  @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  server   Server?   @relation(fields: [serverId], references: [id], onDelete: SetNull)
+  agent    Agent?    @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  payment  Payment?
+  vouchers Voucher[]
+
+  @@index([status])
+  @@index([fulfillStatus])
+  @@index([customerWhatsapp])
+  @@index([agentId])
+  @@index([customerId])
+  @@map("orders")
+}
+
+// ───────────────────────── Payments (D3) ─────────────────────────
+
+/// Gateway-side payment record. Mirrors legacy `qris.transactions`.
+/// Owned by the Payments domain (ACL over a provider). One per order.
+model Payment {
+  id             Int           @id @default(autoincrement())
+  orderId        Int           @unique @map("order_id")
+  reference      String        @unique // provider reference_id
+  provider       String        @default("sim")
+  originalAmount Int           @map("original_amount")
+  totalAmount    Int           @map("total_amount") // base + uniqueDelta. BR-9.
+  uniqueDelta    Int           @map("unique_delta")
+  qrUrl          String?       @map("qr_url")
+  status         PaymentStatus @default(PENDING)
+  paidAt         DateTime?     @map("paid_at")
+  expiresAt      DateTime      @map("expires_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("payments")
+}
+
+/// Reserves a unique payable amount while a payment is in-flight.
+/// Mirrors legacy `qris.amount_locks` (the unique-amount mechanism). BR-9.
+model AmountLock {
+  id          Int      @id @default(autoincrement())
+  totalAmount Int      @unique @map("total_amount")
+  expiresAt   DateTime @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("amount_locks")
+}
+
+// ───────────────────────── Provisioning (D4) ─────────────────────────
+
+/// A provisioned hotspot user. Mirrors legacy `active_vouchers`.
+/// Idempotency anchor: at most one set per order (BR-16, invariant I-3).
+model Voucher {
+  id         Int       @id @default(autoincrement())
+  orderId    Int       @map("order_id")
+  customerId Int?      @map("customer_id") // inbox owner: voucher appears in this customer's account
+  username   String    @unique
+  password   String
+  profile    String?
+  serverId   Int?      @map("server_id")
+  // Validity counts from FIRST LOGIN at the router (calendar/wall-clock), not from
+  // generation. activatedAt = first login (null until used); expiryDate stays null
+  // until activation, then = activatedAt + package duration. Router profile enforces
+  // the real cutoff (Mikhmon-style on-login validity script).
+  activatedAt DateTime? @map("activated_at")
+  expiryDate DateTime? @map("expiry_date") // null until first login; then activatedAt + duration
+  isActive   Boolean   @default(true) @map("is_active")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  order    Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([customerId])
+  @@map("vouchers")
+}
+
+// ───────────────────────── Cross-cutting ─────────────────────────
+
+/// Idempotency store for money/provisioning/webhook operations (NFR-3).
+model IdempotencyKey {
+  id        Int      @id @default(autoincrement())
+  scope     String
+  key       String
+  response  Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([scope, key])
+  @@map("idempotency_keys")
+}
+
+/// Immutable audit of inbound webhooks (replaces legacy daily callback log). BR-30.
+model WebhookEvent {
+  id        Int      @id @default(autoincrement())
+  source    String // e.g. "payment"
+  reference String?
+  valid     Boolean
+  payload   Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([reference])
+  @@map("webhook_events")
+}
+
+// ───────────────────────── Identity (D8) ─────────────────────────
+
+enum AdminStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+/// Business owner. Manages assigned outlets, their agents, prices, customers, reports.
+/// Created by the platform operator (X-Admin-Key). Logs in (JWT actor=admin).
+model Admin {
+  id           Int         @id @default(autoincrement())
+  name         String // the owner's personal name (e.g. "Pak Budi") — internal
+  // Customer-facing brand / service-provider name ("Penyedia Layanan"), e.g. "mascaFi",
+  // "Penanggak .NET". Shown in the customer signup/account picker; falls back to `name`.
+  brandName    String?     @map("brand_name")
+  username     String      @unique
+  phone        String?     @unique
+  email        String?
+  passwordHash String      @map("password_hash")
+  pinHash      String?     @map("pin_hash")
+  status       AdminStatus @default(ACTIVE)
+  // When true this admin governs ALL outlets (and their agents/customers/reports),
+  // including outlets added later — not just the ones explicitly assigned to it.
+  manageAllOutlets Boolean  @default(false) @map("manage_all_outlets")
+  // Platform OPERATOR (the single top-level admin, e.g. the user). Can manage
+  // Penyedia Layanan (other providers/owners) + assign outlets to them via the
+  // /admin/providers operator endpoints. Regular providers have this false.
+  isOperator       Boolean  @default(false) @map("is_operator")
+  // ── Integrations (per-owner business config) ──
+  // Payment: static QRIS payload / merchant string used to receive customer payments.
+  qrisText        String?  @map("qris_text")
+  qrisMerchant    String?  @map("qris_merchant")
+  qrisNmid        String?  @map("qris_nmid")
+  // WhatsApp: admin's own number + outbound gateway used to send vouchers/notifications.
+  waNumber        String?  @map("wa_number")
+  waGatewayUrl    String?  @map("wa_gateway_url")
+  waGatewayKeyEnc String?  @map("wa_gateway_key_enc") // AES-256-GCM encrypted (never plaintext)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  outlets Server[] // outlets explicitly assigned (ignored when manageAllOutlets)
+  agents  Agent[] // agents under this owner
+  qrisAccounts QrisAccount[] // QRIS merchant accounts owned by this admin
+  customers    Customer[]    @relation("CustomerProvider") // customers who picked this provider
+  brands       Brand[]       @relation("AdminBrands") // brands operated by this owner (1 owner → many brands)
+
+  @@map("admins")
+}
+
+// A customer-facing BRAND under a single owner (Admin). One owner (e.g. Pak Budi)
+// runs many brands (e.g. "mascaFi", "Penanggak .NET"). Outlets, QRIS, agents and
+// customers attach to a Brand — NOT to a separate Admin/login. The brand a thing
+// belongs to determines which QRIS receives its payments.
+model Brand {
+  id           Int      @id @default(autoincrement())
+  ownerAdminId Int      @map("owner_admin_id") // the single console owner of this brand
+  name         String // customer-facing brand name, e.g. "mascaFi", "Penanggak .NET"
+  slug         String?  @unique // url/dns key, e.g. "mascafi"
+  isActive     Boolean  @default(true) @map("is_active")
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  owner        Admin         @relation("AdminBrands", fields: [ownerAdminId], references: [id], onDelete: Cascade)
+  outlets      Server[]
+  qrisAccounts QrisAccount[]
+  agents       Agent[]
+  customers    Customer[]
+
+  @@index([ownerAdminId])
+  @@map("brands")
+}
+
+/// A QRIS merchant account owned by an admin. An outlet routes its customer
+/// payments to exactly one QrisAccount (Server.qrisAccountId); many outlets can
+/// share one account, and an admin can have several (e.g. a separate rekening per
+/// outlet-group). Built as its own entity so a future super-agent tier can own
+/// accounts and route its outlets independently without a schema change.
+model QrisAccount {
+  id           Int      @id @default(autoincrement())
+  ownerAdminId Int      @map("owner_admin_id")
+  label        String // display name, e.g. "QRIS 1", "QRIS Korleko"
+  qrisText     String?  @map("qris_text") // static QRIS payload / merchant string
+  merchant     String?
+  nmid         String?
+  isActive     Boolean  @default(true) @map("is_active")
+  // Exactly one QRIS per owner should carry this flag — the merchant that receives
+  // wallet top-ups (which have no outlet to route by). Enforced in the service layer.
+  isTopupDefault Boolean @default(false) @map("is_topup_default")
+  // How this merchant's dynamic QR carries the amount. Some merchants are only
+  // provisioned for STATIC interbank QRIS — an amount-bearing/dynamic QR is then
+  // rejected by banks ("merchant not found") even though GoPay accepts it. Per-account
+  // so each merchant uses what its registration supports. Null → global QRIS_AMOUNT_MODE.
+  //   'dynamic' = POI 11→12 + amount · 'static-amount' = POI 11 + amount · 'static' = as-is
+  paymentMode String? @map("payment_mode")
+  // Payment backend for this merchant: 'gobiz' (GoPay/GoBiz, QR built locally + journals
+  // detection) or 'bri' (BRIAPI SNAP — QR generated via API + webhook/inquiry detection).
+  provider String @default("gobiz")
+  // ── GoBiz merchant session (enables real payment detection via journals/search) ──
+  gobizPhone           String?   @map("gobiz_phone")
+  gobizMerchantId      String?   @map("gobiz_merchant_id")
+  gobizRefreshTokenEnc String?   @map("gobiz_refresh_token_enc") // AES-256-GCM encrypted
+  gobizConnectedAt     DateTime? @map("gobiz_connected_at")
+  // ── BRIAPI (SNAP) merchant credentials — enables BRI QRIS MPM Dynamic + notification ──
+  briClientId        String?  @map("bri_client_id")
+  briClientSecretEnc String?  @map("bri_client_secret_enc") // AES-256-GCM encrypted
+  briPrivateKeyEnc   String?  @map("bri_private_key_enc")   // RSA private key PEM, encrypted
+  briPartnerId       String?  @map("bri_partner_id")
+  briMerchantId      String?  @map("bri_merchant_id")
+  briTerminalId      String?  @map("bri_terminal_id")
+  briChannelId       String?  @map("bri_channel_id")
+  briBaseUrl         String?  @map("bri_base_url") // sandbox/prod override
+  briConnectedAt     DateTime? @map("bri_connected_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  brandId Int?     @map("brand_id") // the Brand this QRIS belongs to (its outlets/agents route here)
+
+  owner   Admin    @relation(fields: [ownerAdminId], references: [id], onDelete: Cascade)
+  brand   Brand?   @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  servers Server[]
+
+  @@index([ownerAdminId])
+  @@index([brandId])
+  @@map("qris_accounts")
+}
+
+/// Which outlets an agent may sell for — an owner-assigned subset of the owner's outlets.
+model AgentOutlet {
+  id        Int      @id @default(autoincrement())
+  agentId   Int      @map("agent_id")
+  serverId  Int      @map("server_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  agent  Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, serverId])
+  @@index([serverId])
+  @@map("agent_outlets")
+}
+
+enum AgentStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+}
+
+/// A limited monitoring user (asisten) created by the superadmin/operator. Sees
+/// data ONLY for the outlets explicitly granted via AssistantOutlet. Read-only by
+/// default (canSell reserved for a future selling capability).
+model Assistant {
+  id           Int         @id @default(autoincrement())
+  name         String
+  username     String      @unique
+  passwordHash String      @map("password_hash")
+  status       AdminStatus @default(ACTIVE)
+  canSell      Boolean     @default(false) @map("can_sell")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  outlets AssistantOutlet[]
+
+  @@map("assistants")
+}
+
+model AssistantOutlet {
+  id          Int      @id @default(autoincrement())
+  assistantId Int      @map("assistant_id")
+  serverId    Int      @map("server_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  assistant Assistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+  server    Server    @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([assistantId, serverId])
+  @@index([serverId])
+  @@map("assistant_outlets")
+}
+
+/// Reseller account. Mirrors legacy `agents` (bcrypt→scrypt here; BR-28).
+model Agent {
+  id              Int         @id @default(autoincrement())
+  name            String
+  phone           String      @unique
+  username        String?     @unique
+  email           String?
+  passwordHash    String      @map("password_hash")
+  pinHash         String?     @map("pin_hash")
+  status          AgentStatus @default(ACTIVE)
+  discountPercent Int?        @map("discount_percent")
+  adminId         Int?        @map("admin_id") // the Owner this agent belongs to
+  brandId         Int?        @map("brand_id") // the Brand this agent sells under (its QRIS receives the agent's sales)
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  orders     Order[]
+  admin      Admin?              @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  brand      Brand?              @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  outlets    AgentOutlet[]
+  sellPrices AgentPackagePrice[]
+  contacts   AgentContact[]
+
+  @@index([adminId])
+  @@index([brandId])
+  @@map("agents")
+}
+
+enum CustomerStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+/// End-customer account (mobile ecosystem). New — no legacy equivalent (storefront
+/// was anonymous). Owns a customer wallet via the generic Account model.
+model Customer {
+  id           Int            @id @default(autoincrement())
+  name         String?
+  username     String?        @unique
+  phone        String         @unique
+  email        String?
+  passwordHash String         @map("password_hash")
+  status       CustomerStatus @default(ACTIVE)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  // Provider ("Penyedia Layanan") this customer belongs to — chosen at registration,
+  // editable in the account page. Determines which merchant (QRIS) receives this
+  // customer's wallet top-ups and which provider's catalog they see.
+  providerAdminId Int? @map("provider_admin_id")
+  brandId         Int? @map("brand_id") // the Brand this customer signed up under (its catalog + QRIS for top-ups)
+
+  orders   Order[]
+  vouchers Voucher[]
+  provider Admin?    @relation("CustomerProvider", fields: [providerAdminId], references: [id], onDelete: SetNull)
+  brand    Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
+
+  @@index([providerAdminId])
+  @@index([brandId])
+  @@map("customers")
+}
+
+// ───────────────────────── Wallet & Ledger (D5) ─────────────────────────
+// Generalized, account-agnostic. See WALLET_ARCHITECTURE.md. Preserves BR-23/24/25.
+
+enum AccountOwnerType {
+  AGENT
+  CUSTOMER
+  SYSTEM
+}
+
+enum LedgerDirection {
+  CREDIT
+  DEBIT
+}
+
+enum LedgerType {
+  TOPUP
+  PURCHASE
+  REFUND
+  ADJUSTMENT
+}
+
+enum HoldStatus {
+  ACTIVE
+  SETTLED
+  RELEASED
+  EXPIRED
+}
+
+/// A wallet. `balance` is a cache; the ledger is authoritative (WI-1).
+model Account {
+  id        Int              @id @default(autoincrement())
+  ownerType AccountOwnerType @map("owner_type")
+  ownerId   Int              @map("owner_id")
+  currency  String           @default("IDR")
+  balance   Int              @default(0)
+  status    String           @default("active")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  ledger LedgerEntry[]
+  holds  Hold[]
+
+  @@unique([ownerType, ownerId])
+  @@map("accounts")
+}
+
+/// Append-only ledger entry. Carries balanceAfter (BR-23). Idempotent per
+/// (account, type, reference) (BR-24, WI-4).
+model LedgerEntry {
+  id            Int             @id @default(autoincrement())
+  accountId     Int             @map("account_id")
+  direction     LedgerDirection
+  type          LedgerType
+  amount        Int // positive; sign implied by direction
+  balanceAfter  Int             @map("balance_after")
+  referenceId   String?         @map("reference_id")
+  relatedHoldId Int?            @map("related_hold_id")
+  description   String?
+  createdAt     DateTime        @default(now()) @map("created_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, type, referenceId])
+  @@index([accountId])
+  @@map("ledger_entries")
+}
+
+/// Fund reservation for the purchase saga (WALLET_ARCHITECTURE §3.3/§4).
+model Hold {
+  id          Int        @id @default(autoincrement())
+  accountId   Int        @map("account_id")
+  amount      Int
+  referenceId String     @map("reference_id") // order reference
+  status      HoldStatus @default(ACTIVE)
+  expiresAt   DateTime   @map("expires_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, status])
+  @@map("holds")
+}
+
+/// Saved customer contacts for an agent (quick-pick when selling).
+model AgentContact {
+  id        Int      @id @default(autoincrement())
+  agentId   Int      @map("agent_id")
+  name      String
+  username  String?
+  phone     String?
+  note      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId])
+  @@map("agent_contacts")
+}

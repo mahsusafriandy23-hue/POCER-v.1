@@ -1,0 +1,43 @@
+# Full stack: Postgres + the API. Run with:  docker compose -f docker-compose.prod.yml up --build
+# (For a managed DB like Supabase: drop the postgres service and point DATABASE_URL at it.)
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: voucher
+      POSTGRES_PASSWORD: voucher
+      POSTGRES_DB: voucher_platform
+    volumes:
+      - voucher_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voucher -d voucher_platform"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://voucher:voucher@postgres:5432/voucher_platform?schema=public
+      PORT: "8080"
+      API_PREFIX: api/v1
+      NODE_ENV: production
+      # secrets — set real values via your orchestrator / .env, NOT here in plain text
+      WEBHOOK_SECRET: change-me
+      JWT_SECRET: change-me
+      # providers (default sim; switch when ready)
+      PAYMENT_PROVIDER: sim
+      DETECTION_PROVIDER: sim
+      NOTIFICATION_PROVIDER: sim
+      PROVISIONING_PROVIDER: sim
+      SCHEDULER_ENABLED: "true"
+      SCHEDULER_INTERVAL_MS: "30000"
+      SEED_ON_START: "true"
+    ports:
+      - "8080:8080"
+
+volumes:
+  voucher_pgdata:

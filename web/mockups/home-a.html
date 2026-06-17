@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>mascaFi — Arah A (Azure Friendly)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --azure:#1E6BFF; --azure2:#48A0FF; --ink:#0B1B33; --muted:#5A6B85; }
+  *{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  body{background:#EAF1FF}
+  .stage{background:radial-gradient(120% 60% at 50% 0%, #DCE9FF 0%, #EAF1FF 60%)}
+  .phone{width:390px;max-width:100%;background:#F4F8FF;border-radius:36px;box-shadow:0 30px 80px -20px rgba(20,60,140,.35);overflow:hidden}
+  .hero{background:linear-gradient(135deg,#1E6BFF 0%,#3B8DFF 55%,#48C6FF 100%)}
+  .hero-glow{background:radial-gradient(80% 120% at 80% -10%, rgba(255,255,255,.35), transparent 60%)}
+  .soft{box-shadow:0 8px 24px -10px rgba(30,107,255,.25)}
+  .qa{box-shadow:0 6px 18px -8px rgba(30,107,255,.30)}
+  .chip-active{background:var(--azure);color:#fff}
+  .label{font-size:11px;letter-spacing:.02em}
+</style>
+</head>
+<body class="stage min-h-screen flex flex-col items-center py-8 gap-4">
+  <div class="text-center">
+    <div class="text-xs font-semibold tracking-wide text-[#1E6BFF]">ARAH A</div>
+    <div class="text-lg font-extrabold text-[#0B1B33]">Azure Friendly — cerah, ramah, “super-app”</div>
+  </div>
+
+  <div class="phone">
+    <!-- header -->
+    <div class="hero relative px-5 pt-6 pb-20 text-white">
+      <div class="hero-glow absolute inset-0"></div>
+      <div class="relative flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-white/20 grid place-items-center font-bold">W</div>
+          <div>
+            <div class="text-[13px] text-white/80">Selamat sore,</div>
+            <div class="font-bold -mt-0.5">Wati 👋</div>
+          </div>
+        </div>
+        <button class="w-10 h-10 rounded-full bg-white/15 grid place-items-center">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4a4 4 0 00-4 4v3l-1.5 2.5h11L14 11V8a4 4 0 00-4-4z"/><path d="M8 16a2 2 0 004 0"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- balance card (overlap) -->
+    <div class="px-5 -mt-14 relative">
+      <div class="rounded-3xl bg-white p-5 soft">
+        <div class="flex items-center justify-between">
+          <span class="text-[13px] text-[#5A6B85] font-medium">Saldo mascaFi</span>
+          <span class="text-[11px] font-semibold text-[#1E6BFF] bg-[#EAF1FF] px-2 py-1 rounded-full">Akun #1042</span>
+        </div>
+        <div class="mt-1 flex items-end gap-1">
+          <span class="text-[15px] font-semibold text-[#0B1B33] mb-1">Rp</span>
+          <span class="text-[34px] leading-none font-extrabold text-[#0B1B33] tracking-tight">34.000</span>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          <button class="rounded-2xl bg-[#1E6BFF] text-white font-bold py-3 qa flex items-center justify-center gap-2">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 4v10M4 9h10"/></svg> Isi Saldo
+          </button>
+          <button class="rounded-2xl bg-[#EAF1FF] text-[#1E6BFF] font-bold py-3 flex items-center justify-center gap-2">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 5h10l-1 7H5L4 5z"/><circle cx="7" cy="15" r="1"/><circle cx="12" cy="15" r="1"/></svg> Beli Voucher
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- quick actions -->
+    <div class="px-5 mt-5 grid grid-cols-4 gap-2 text-center">
+      <div><div class="mx-auto w-12 h-12 rounded-2xl bg-white grid place-items-center text-[#1E6BFF] qa">⚡</div><div class="label mt-1 text-[#5A6B85] font-medium">Cepat</div></div>
+      <div><div class="mx-auto w-12 h-12 rounded-2xl bg-white grid place-items-center text-[#1E6BFF] qa">🎟️</div><div class="label mt-1 text-[#5A6B85] font-medium">Voucher</div></div>
+      <div><div class="mx-auto w-12 h-12 rounded-2xl bg-white grid place-items-center text-[#1E6BFF] qa">🧾</div><div class="label mt-1 text-[#5A6B85] font-medium">Riwayat</div></div>
+      <div><div class="mx-auto w-12 h-12 rounded-2xl bg-white grid place-items-center text-[#1E6BFF] qa">💬</div><div class="label mt-1 text-[#5A6B85] font-medium">Bantuan</div></div>
+    </div>
+
+    <!-- locations -->
+    <div class="px-5 mt-6 flex items-center gap-2 overflow-x-auto">
+      <span class="text-[13px] font-bold text-[#0B1B33] mr-1">Lokasi</span>
+      <span class="text-[12px] font-semibold px-3 py-1.5 rounded-full chip-active">Gunungsari</span>
+      <span class="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white text-[#5A6B85]">Labuapi</span>
+      <span class="text-[12px] font-semibold px-3 py-1.5 rounded-full bg-white text-[#5A6B85]">Selaparang</span>
+    </div>
+
+    <!-- packages -->
+    <div class="px-5 mt-3 space-y-2.5">
+      <div class="rounded-2xl bg-white p-4 flex items-center justify-between soft">
+        <div><div class="font-bold text-[#0B1B33]">NEMBAK <span class="text-[#1E6BFF]">· 2 jam</span></div><div class="text-[12px] text-[#5A6B85]">Cocok buat ngebut sebentar</div></div>
+        <div class="text-right"><div class="font-extrabold text-[#0B1B33]">Rp1.000</div><button class="text-[12px] font-bold text-white bg-[#1E6BFF] px-3 py-1 rounded-lg mt-1">Beli</button></div>
+      </div>
+      <div class="rounded-2xl bg-white p-4 flex items-center justify-between soft">
+        <div><div class="font-bold text-[#0B1B33]">LITE <span class="text-[#1E6BFF]">· 24 jam</span></div><div class="text-[12px] text-[#5A6B85]">Seharian internetan</div></div>
+        <div class="text-right"><div class="font-extrabold text-[#0B1B33]">Rp3.000</div><button class="text-[12px] font-bold text-white bg-[#1E6BFF] px-3 py-1 rounded-lg mt-1">Beli</button></div>
+      </div>
+      <div class="rounded-2xl bg-white p-4 flex items-center justify-between soft">
+        <div><div class="font-bold text-[#0B1B33]">BEBAS <span class="text-[#1E6BFF]">· 2 hari</span></div><div class="text-[12px] text-[#5A6B85]">Lebih lama, lebih hemat</div></div>
+        <div class="text-right"><div class="font-extrabold text-[#0B1B33]">Rp5.000</div><button class="text-[12px] font-bold text-white bg-[#1E6BFF] px-3 py-1 rounded-lg mt-1">Beli</button></div>
+      </div>
+    </div>
+
+    <!-- inbox -->
+    <div class="px-5 mt-6">
+      <div class="flex items-center justify-between"><span class="font-bold text-[#0B1B33]">Voucher Saya</span><span class="text-[12px] font-semibold text-[#1E6BFF]">Lihat semua</span></div>
+      <div class="mt-2 rounded-2xl p-4 text-white" style="background:linear-gradient(120deg,#0B1B33,#1E3A6B)">
+        <div class="flex items-center justify-between"><span class="text-[12px] text-white/70">NEMBAK · Gunungsari</span><span class="text-[11px] bg-white/15 px-2 py-0.5 rounded-full">Aktif</span></div>
+        <div class="mt-2 font-mono text-2xl font-bold tracking-widest">0802311</div>
+        <div class="text-[12px] text-white/60 mt-1">Berlaku s/d 04 Jun 04:13</div>
+      </div>
+    </div>
+
+    <!-- bottom nav -->
+    <div class="mt-6 bg-white px-6 py-3 flex items-center justify-between border-t border-[#E6EEFC]">
+      <div class="text-[#1E6BFF] text-center"><div>🏠</div><div class="label font-bold">Beranda</div></div>
+      <div class="text-[#9AA8C2] text-center"><div>🎟️</div><div class="label">Voucher</div></div>
+      <div class="text-[#9AA8C2] text-center"><div>🧾</div><div class="label">Riwayat</div></div>
+      <div class="text-[#9AA8C2] text-center"><div>👤</div><div class="label">Akun</div></div>
+    </div>
+  </div>
+
+  <p class="text-[12px] text-[#5A6B85] max-w-[390px] text-center px-4">Karakter: cerah & ramah, kartu putih melayang di atas hero biru-cyan, sudut membulat, ramah disentuh. Energi MyTelkomsel tapi biru.</p>
+</body>
+</html>
