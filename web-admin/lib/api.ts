@@ -1,5 +1,5 @@
 /**
- * Thin client for the voucher-platform API — Internal app (Owner + Agent).
+ * Thin client for the POCER v1 API — Internal app (Owner + Agent).
  * A single Bearer JWT is stored in localStorage; the active role decides which
  * endpoints are used. Owners log in via /admin/auth/login (actor=admin),
  * agents via /auth/login (actor=agent).

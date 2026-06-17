@@ -2,7 +2,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: voucher-platform-db
+    container_name: pocer-v1-db
     environment:
       POSTGRES_USER: voucher
       POSTGRES_PASSWORD: voucher

@@ -1,5 +1,5 @@
 /**
- * Thin client for the voucher-platform API.
+ * Thin client for the POCER v1 API.
  * Customer endpoints use a Bearer JWT stored in localStorage.
  */
 

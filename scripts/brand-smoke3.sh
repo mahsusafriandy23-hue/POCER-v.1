@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cd /root/voucher-platform; export TMPDIR=/tmp HOME=/root; unset TMPPREFIX
+cd /root/pocer-v1; export TMPDIR=/tmp HOME=/root; unset TMPPREFIX
 pkill -f "node dist/main.js" 2>/dev/null
 node dist/main.js > /tmp/brand-smoke3-server.log 2>&1 &
 SRV=$!

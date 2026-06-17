@@ -1,4 +1,4 @@
-# voucher-platform
+# POCER v1
 
 API-first backend (NestJS + Prisma + PostgreSQL) — a **greenfield mirror** of the production
 PENANGGAK NET WiFi-voucher system. **Fully isolated from production (VM102): own DB, no connection

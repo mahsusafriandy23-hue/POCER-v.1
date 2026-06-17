@@ -47,7 +47,7 @@ async function call(path, { method = 'GET', body, token, key } = {}) {
 const rnd = Math.floor(Math.random() * 9_000_000) + 1_000_000;
 
 async function main() {
-  log('\n=== voucher-platform E2E (sim) ===');
+  log('\n=== POCER v1 E2E (sim) ===');
 
   // 1) Catalog
   let r = await call('/catalog/servers', {});

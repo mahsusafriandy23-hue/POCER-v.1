@@ -1,4 +1,4 @@
-# RUN & DEPLOY — voucher-platform
+# RUN & DEPLOY — POCER v1
 
 How to run this backend on your laptop, how it relates to Supabase, and how the
 (future) Flutter app fits. Plain-language.
@@ -43,14 +43,14 @@ Two ways:
 
 **A) Git (recommended)** — push this folder to a private GitHub repo, then on your laptop:
 ```bash
-git clone <your-repo-url> voucher-platform
-cd voucher-platform
+git clone <your-repo-url> pocer-v1
+cd pocer-v1
 ```
 
 **B) Download the archive** — a tarball is provided at the project root
-(`../voucher-platform.tar.gz`, excludes node_modules/dist). Copy it to your laptop and:
+(`../pocer-v1.tar.gz`, excludes node_modules/dist). Copy it to your laptop and:
 ```bash
-tar xzf voucher-platform.tar.gz && cd voucher-platform
+tar xzf pocer-v1.tar.gz && cd pocer-v1
 ```
 
 ## 4. Run it on your laptop (dev)

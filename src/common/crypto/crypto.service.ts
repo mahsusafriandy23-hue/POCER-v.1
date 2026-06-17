@@ -17,7 +17,7 @@ export class CryptoService {
     if (!secret) {
       this.logger.warn('APP_ENCRYPTION_KEY not set — using an insecure dev key. Set it in production!');
     }
-    this.key = scryptSync(secret || 'dev-insecure-key', 'voucher-platform-salt', 32);
+    this.key = scryptSync(secret || 'dev-insecure-key', 'pocer-v1-salt', 32);
   }
 
   encrypt(plain: string): string {

@@ -46,7 +46,7 @@ async function bootstrap() {
   const port = config.get<number>('PORT', 8080);
   await app.listen(port);
   new Logger('Bootstrap').log(
-    `voucher-platform API listening on :${port}/${prefix} (env=${config.get('NODE_ENV')})`,
+    `POCER v1 API listening on :${port}/${prefix} (env=${config.get('NODE_ENV')})`,
   );
 }
 bootstrap();
