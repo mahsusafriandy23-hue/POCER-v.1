@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 
-// mascaFi Admin — indigo "control panel" identity (distinct from the azure client app).
+// POCER Admin — indigo "control panel" identity (distinct from the azure client app).
 // Token NAMES are kept the same as the other apps (azure/ink/haze/…) so shared
 // components restyle automatically; only the VALUES shift to indigo/slate.
 const config: Config = {

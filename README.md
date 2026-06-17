@@ -1,13 +1,10 @@
 # POCER v1
 
-API-first backend (NestJS + Prisma + PostgreSQL) — a **greenfield mirror** of the production
-PENANGGAK NET WiFi-voucher system. **Fully isolated from production (VM102): own DB, no connection
-to live MikroTik / GoBiz / WhatsApp.** External integrations are behind **ports** with **simulator**
-adapters so the whole purchase lifecycle runs end-to-end with zero external dependencies.
+API-first WiFi-voucher platform backend (NestJS + Prisma + PostgreSQL). External integrations
+(MikroTik / payment gateway / WhatsApp) sit behind **ports** with **simulator** adapters, so the
+whole purchase lifecycle runs end-to-end with zero external dependencies.
 
-Design basis: `/root/vm102-analysis/docs/` (EXISTING_SYSTEM, FUNCTIONAL_SPECIFICATION,
-SYSTEM_DOMAIN_MAP, API_BLUEPRINT, WALLET_ARCHITECTURE, MIGRATION_STRATEGY). Business rules from the
-spec are cited inline in code (BR-x).
+Business rules are cited inline in code (BR-x).
 
 ## Status
 **Slice 1 — Catalog + Ordering (core):** Catalog (servers/packages/price), Ordering (lifecycle),

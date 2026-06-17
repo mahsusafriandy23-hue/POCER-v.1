@@ -8,7 +8,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // POCER Agen — dark OLED amber (tone: penanggak.net)
+        // POCER Agen — dark OLED amber (tone: POCER)
         azure: {
           DEFAULT: "#D4AF37",   // classic gold
           400:     "#E0C050",

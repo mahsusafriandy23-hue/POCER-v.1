@@ -16,7 +16,7 @@ import type { ServerLocation } from "./api";
  *    stored choice, or the first outlet as a neutral default).
  */
 
-const PREF_KEY = "mascafi.outlet"; // { id: number, manual: boolean }
+const PREF_KEY = "pocer.outlet"; // { id: number, manual: boolean }
 // A different outlet is only recommended when it is at least this much closer
 // (km) than the current one — avoids nagging for marginal differences.
 const RECOMMEND_MARGIN_KM = 5;

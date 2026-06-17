@@ -71,14 +71,13 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
   // at every breakpoint (the phone-width column lives in the root layout).
   return (
     <div className="h-dvh flex flex-col overflow-hidden" style={{ background: "#0A0A0F" }}>
-      {/* Top bar — bright azure (matches the consumer "my mascaFi" identity) */}
+      {/* Top bar — bright azure (matches the consumer "my POCER" identity) */}
       <header className="sticky top-0 z-20 bg-[#111118] border-b border-line px-4 h-14 flex items-center justify-between relative overflow-hidden">
         <div className="hero-glow absolute inset-0" aria-hidden />
         <div className="relative flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-azure/20 grid place-items-center font-extrabold text-azure">P</div>
           <div>
             <span className="font-extrabold tracking-tight text-ink">POCER</span>
-            <span className="text-[10px] text-muted font-medium ml-1.5">by penanggak.net</span>
           </div>
         </div>
         <div className="relative flex items-center gap-2">

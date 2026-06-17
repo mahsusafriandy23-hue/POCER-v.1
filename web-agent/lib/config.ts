@@ -1,7 +1,7 @@
 import type { Role } from "./api";
 
 /**
- * mascaFi Agen — this deployment is the AGENT surface only.
+ * POCER Agen — this deployment is the AGENT surface only.
  *
  * Unlike the combined console, this app never exposes the owner login. The mode
  * is hard-locked to "agent": even if NEXT_PUBLIC_APP_MODE is set to something

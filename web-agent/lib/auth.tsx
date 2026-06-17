@@ -18,7 +18,7 @@ type AuthState = {
   logout: () => void;
 };
 
-const SESSION_KEY = "mascafi.internal.session";
+const SESSION_KEY = "pocer.internal.session";
 const AuthCtx = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {

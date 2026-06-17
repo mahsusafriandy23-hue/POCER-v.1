@@ -83,7 +83,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
         <div className="flex items-center gap-2 px-2 mb-8">
           <div className="h-9 w-9 rounded-xl bg-hero grid place-items-center font-extrabold text-white">m</div>
           <div>
-            <div className="font-extrabold text-white leading-tight">mascaFi</div>
+            <div className="font-extrabold text-white leading-tight">POCER</div>
             <div className="text-[11px] text-white/50 -mt-0.5">Console · {roleLabel}</div>
           </div>
         </div>
@@ -119,7 +119,7 @@ export function AppShell({ role, children }: { role: Role; children: ReactNode }
         <header className="md:hidden sticky top-0 z-20 bg-ink text-white px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-hero grid place-items-center font-extrabold">m</div>
-            <span className="font-extrabold">mascaFi</span>
+            <span className="font-extrabold">POCER</span>
             <span className="text-[11px] bg-white/15 rounded-full px-2 py-0.5">{roleLabel}</span>
           </div>
           <div className="h-8 w-8 rounded-full bg-white/15 grid place-items-center text-[13px] font-bold">

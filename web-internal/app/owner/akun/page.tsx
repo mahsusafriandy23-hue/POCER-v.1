@@ -80,7 +80,7 @@ export default function OwnerAccount() {
         <LogoutIcon size={18} /> Keluar
       </Button>
 
-      <p className="text-center text-[12px] text-muted mt-4">mascaFi Console · Pemilik</p>
+      <p className="text-center text-[12px] text-muted mt-4">POCER Console · Pemilik</p>
     </div>
   );
 }

@@ -3,15 +3,15 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// COMBINED catalog: PENANGGAK + mascaFi. Idempotent (upsert/find-or-create) — running
+// COMBINED catalog: POCER + POCER. Idempotent (upsert/find-or-create) — running
 // this never deletes existing rows, only adds what's missing. Prices in integer rupiah.
 // `active` mirrors is_active (inactive packages exist but aren't sold on the storefront).
 const SERVERS = [
-  // PENANGGAK
+  // POCER
   { code: 'KORLEKO', name: 'KORLEKO', sortOrder: 1 },
   { code: 'TIRTANADI', name: 'TIRTANADI', sortOrder: 2 },
   { code: 'TEMANJOR', name: 'TEMANJOR', sortOrder: 3 },
-  // mascaFi
+  // POCER
   { code: 'GUNUNGSARI', name: 'Gunungsari', sortOrder: 4 },
   { code: 'LABUAPI', name: 'Labuapi', sortOrder: 5 },
   { code: 'SELAPARANG', name: 'Selaparang', sortOrder: 6 }, // no packages yet
@@ -19,7 +19,7 @@ const SERVERS = [
 
 type Pkg = { server: string; name: string; price: number; duration: string; profile: string; active: boolean };
 const PACKAGES: Pkg[] = [
-  // ── PENANGGAK ──
+  // ── POCER ──
   { server: 'KORLEKO', name: 'PAKET 50000', price: 50000, duration: '30d', profile: '50000-ONLINE', active: true },
   { server: 'KORLEKO', name: 'PAKET 15000', price: 15000, duration: '7d', profile: '15000-ONLINE', active: true },
   { server: 'KORLEKO', name: 'PAKET 5000', price: 5000, duration: '2d', profile: '5000-ONLINE', active: true },
@@ -35,7 +35,7 @@ const PACKAGES: Pkg[] = [
   { server: 'TEMANJOR', name: '2jam', price: 2000, duration: '2h', profile: '2jam', active: true },
   { server: 'TEMANJOR', name: 'MINGGUAN', price: 15000, duration: '7d', profile: 'SEMINGGU-15.000', active: true },
   { server: 'TEMANJOR', name: 'paket-50-sebulan', price: 50000, duration: '30d', profile: 'paket-50-sebulan', active: true },
-  // ── mascaFi (Gunungsari) ──
+  // ── POCER (Gunungsari) ──
   { server: 'GUNUNGSARI', name: 'DEVTES', price: 50, duration: '1m', profile: 'TRIAL', active: false },
   { server: 'GUNUNGSARI', name: 'SONIC', price: 1000, duration: '3h', profile: 'VOUCHER-SONIC/REG-1K', active: false },
   { server: 'GUNUNGSARI', name: 'NEMBAK', price: 1000, duration: '2h', profile: 'VOUCHER-NEMBAK/REG-1K', active: true },
@@ -48,7 +48,7 @@ const PACKAGES: Pkg[] = [
   { server: 'GUNUNGSARI', name: 'Hemat 10rb (3 Voucher)', price: 10000, duration: '3 voucher', profile: 'BUNDLE', active: false },
   { server: 'GUNUNGSARI', name: 'JUMBO', price: 10000, duration: '10d', profile: 'VOUCHER-JUMBO/PRM-10K', active: false },
   { server: 'GUNUNGSARI', name: 'BULANAN-50K', price: 50000, duration: '30d', profile: 'VOUCHER-BULANAN-50K/30D', active: true },
-  // ── mascaFi (Labuapi) ──
+  // ── POCER (Labuapi) ──
   { server: 'LABUAPI', name: 'TRIAL', price: 1000, duration: '1m', profile: 'TRIAL', active: false },
   { server: 'LABUAPI', name: '5K-SEHARI', price: 5000, duration: '1d', profile: '5K-SEHARI', active: true },
   { server: 'LABUAPI', name: '15K-1MINGGU', price: 15000, duration: '7d', profile: '15K-1MINGGU', active: true },

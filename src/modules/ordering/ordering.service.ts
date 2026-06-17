@@ -161,7 +161,7 @@ export class OrderingService {
       phone: agent.phone,
       status: agent.status,
       hasPin: !!agent.pinHash,
-      // The agent's "penyedia" is its BRAND (mascaFi / Penanggak .NET), not the
+      // The agent's "penyedia" is its BRAND (POCER / POCER), not the
       // back-office owner. Fall back to the owner only if no brand is set.
       owner: agent.brand
         ? { id: agent.brand.id, name: agent.brand.name }

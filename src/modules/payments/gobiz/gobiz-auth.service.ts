@@ -35,7 +35,7 @@ export class GobizAuthService {
     this.tokenUrl = `${base}/goid/token`;
     this.loginUrl = config.get<string>('GOID_LOGIN_URL', `${base}/goid/login/request`);
     this.meUrl = `${base}/v1/users/me`;
-    // client_id that the proven mascafi/penanggak flow uses for OTP + token grants.
+    // client_id used by the GoBiz web flow for OTP + token grants.
     this.clientId = config.get<string>('GOID_CLIENT_ID', 'go-biz-web-new');
     // GoID rejects stale app versions ("Harap perbarui versi"). Default = current
     // app.gobiz.com build; override via GOID_APP_VERSION when GoBiz bumps it.
@@ -114,7 +114,7 @@ export class GobizAuthService {
   }
 
   /** Step 1 — request an OTP to the merchant's phone. Returns an otpToken for verify.
-   *  Body/endpoint match the captured mascafi flow (gobiz_otp_login.js). */
+   *  Body/endpoint match the GoBiz web OTP flow. */
   async requestOtp(rawPhone: string): Promise<{ otpToken: string }> {
     const { phone } = this.splitPhone(rawPhone);
     const { ok, status, json } = await this.post(this.loginUrl, {

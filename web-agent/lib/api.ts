@@ -8,7 +8,7 @@
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") || "http://localhost:8080/api/v1";
 
-const TOKEN_KEY = "mascafi.internal.token";
+const TOKEN_KEY = "pocer.internal.token";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -71,7 +71,7 @@ export async function api<T = unknown>(path: string, opts: Options = {}): Promis
     // to login instead of surfacing a cryptic "invalid expired token".
     if (res.status === 401 && auth && typeof window !== "undefined") {
       setToken(null);
-      window.localStorage.removeItem("mascafi.internal.session");
+      window.localStorage.removeItem("pocer.internal.session");
       if (!window.location.pathname.startsWith("/masuk")) {
         window.location.replace("/masuk?expired=1");
       }

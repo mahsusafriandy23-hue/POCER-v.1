@@ -1,7 +1,7 @@
 import type { Role } from "./api";
 
 /**
- * mascaFi ADMIN app — owner-only by default. (The agent app is a separate
+ * POCER ADMIN app — owner-only by default. (The agent app is a separate
  * deployment; the client app is web/.) An env override is honored for flexibility
  * but it never silently falls back to a less-restrictive surface here.
  */

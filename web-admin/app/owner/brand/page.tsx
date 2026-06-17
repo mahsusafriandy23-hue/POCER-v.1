@@ -142,12 +142,12 @@ function BrandSheet({
   return (
     <Sheet open={!!target} onClose={onClose} title={isNew ? "Brand baru" : brand?.name || "Brand"}>
       <form onSubmit={submit} className="space-y-3.5">
-        <TextField label="Nama brand" value={name} onChange={(e) => setName(e.target.value)} required placeholder="mis. mascaFi" />
+        <TextField label="Nama brand" value={name} onChange={(e) => setName(e.target.value)} required placeholder="mis. POCER" />
         <TextField
           label="Slug (opsional)"
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
-          placeholder="mis. mascafi"
+          placeholder="mis. pocer"
           hint="Dipakai untuk URL/identitas. Huruf kecil, angka, tanda hubung."
         />
         {!isNew && (

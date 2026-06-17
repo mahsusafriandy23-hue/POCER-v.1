@@ -7,7 +7,7 @@ export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") ||
   "http://localhost:8080/api/v1";
 
-const TOKEN_KEY = "mascafi.token";
+const TOKEN_KEY = "pocer.token";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -71,7 +71,7 @@ export async function api<T = unknown>(path: string, opts: Options = {}): Promis
     // Expired/invalid session → drop token and redirect to login.
     if (res.status === 401 && auth && typeof window !== "undefined") {
       setToken(null);
-      window.localStorage.removeItem("mascafi.user");
+      window.localStorage.removeItem("pocer.user");
       if (!window.location.pathname.startsWith("/masuk")) {
         window.location.replace("/masuk");
       }

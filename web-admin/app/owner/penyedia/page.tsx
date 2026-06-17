@@ -329,7 +329,7 @@ function ProviderDetailSheet({ provider, onClose, onChanged }: { provider: Provi
             <div className="rounded-2xl bg-white border border-line p-3.5 space-y-3">
               <div className="text-[13px] font-extrabold text-ink">Edit penyedia · @{detail.username}</div>
               <TextField label="Nama pemilik" value={name} onChange={(e) => setName(e.target.value)} required />
-              <TextField label="Nama brand / layanan" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="mis. mascaFi" hint="Nama yang dilihat pelanggan. Username login tidak bisa diubah." />
+              <TextField label="Nama brand / layanan" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="mis. POCER" hint="Nama yang dilihat pelanggan. Username login tidak bisa diubah." />
               <TextField label="Password baru" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Kosongkan jika tidak diganti" hint="Min 6 karakter. Reset password penyedia ini." />
               <div className="flex gap-2">
                 <Button variant="soft" className="flex-1" onClick={() => { setEditing(false); setName(detail.name); setBrand(detail.brandName ?? ""); setPassword(""); setErr(null); }} disabled={busy}>Batal</Button>

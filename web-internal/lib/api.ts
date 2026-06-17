@@ -8,7 +8,7 @@
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") || "http://localhost:8080/api/v1";
 
-const TOKEN_KEY = "mascafi.internal.token";
+const TOKEN_KEY = "pocer.internal.token";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;

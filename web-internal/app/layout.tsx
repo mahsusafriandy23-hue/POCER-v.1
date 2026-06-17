@@ -3,8 +3,8 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "mascaFi Console",
-  description: "Konsol internal mascaFi — kelola outlet, agen, dan penjualan voucher.",
+  title: "POCER Console",
+  description: "Konsol internal POCER — kelola outlet, agen, dan penjualan voucher.",
 };
 
 export const viewport: Viewport = {

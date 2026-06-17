@@ -1,7 +1,7 @@
 {
   "name": "pocer-v1",
   "version": "0.1.0",
-  "description": "API-first voucher platform (greenfield mirror of PENANGGAK NET). Isolated from production.",
+  "description": "API-first WiFi-voucher platform (NestJS + Prisma + PostgreSQL).",
   "license": "UNLICENSED",
   "private": true,
   "scripts": {

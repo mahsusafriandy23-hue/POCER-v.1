@@ -46,7 +46,7 @@ export default function MasukPage() {
         <div className="relative">
           <div className="h-12 w-12 rounded-2xl bg-hero grid place-items-center font-extrabold text-xl shadow-qa">m</div>
           <h1 className="mt-5 text-[26px] font-extrabold leading-tight">
-            mascaFi {APP_MODE === "agent" ? "Agen" : APP_MODE === "owner" ? "Admin" : "Console"}
+            POCER {APP_MODE === "agent" ? "Agen" : APP_MODE === "owner" ? "Admin" : "Console"}
           </h1>
           <p className="text-white/60 text-[14px] mt-1">
             {APP_MODE === "agent"

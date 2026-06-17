@@ -1,7 +1,5 @@
-// Voucher Platform — Prisma schema (PostgreSQL)
-// Greenfield mirror of PENANGGAK NET. Preserves existing business rules & data model
-// (see /root/vm102-analysis/docs/DATABASE_STRUCTURE.md) but cleaned for the new system.
-// Isolated from production: this is a fresh DB, no connection to VM102.
+// POCER — Prisma schema (PostgreSQL)
+// WiFi-voucher platform data model. Fresh DB.
 
 generator client {
   provider = "prisma-client-js"
@@ -315,8 +313,8 @@ enum AdminStatus {
 model Admin {
   id           Int         @id @default(autoincrement())
   name         String // the owner's personal name (e.g. "Pak Budi") — internal
-  // Customer-facing brand / service-provider name ("Penyedia Layanan"), e.g. "mascaFi",
-  // "Penanggak .NET". Shown in the customer signup/account picker; falls back to `name`.
+  // Customer-facing brand / service-provider name ("Penyedia Layanan"), e.g. "POCER",
+  // "POCER". Shown in the customer signup/account picker; falls back to `name`.
   brandName    String?     @map("brand_name")
   username     String      @unique
   phone        String?     @unique
@@ -353,14 +351,14 @@ model Admin {
 }
 
 // A customer-facing BRAND under a single owner (Admin). One owner (e.g. Pak Budi)
-// runs many brands (e.g. "mascaFi", "Penanggak .NET"). Outlets, QRIS, agents and
+// runs many brands (e.g. "POCER", "POCER"). Outlets, QRIS, agents and
 // customers attach to a Brand — NOT to a separate Admin/login. The brand a thing
 // belongs to determines which QRIS receives its payments.
 model Brand {
   id           Int      @id @default(autoincrement())
   ownerAdminId Int      @map("owner_admin_id") // the single console owner of this brand
-  name         String // customer-facing brand name, e.g. "mascaFi", "Penanggak .NET"
-  slug         String?  @unique // url/dns key, e.g. "mascafi"
+  name         String // customer-facing brand name, e.g. "POCER", "POCER"
+  slug         String?  @unique // url/dns key, e.g. "pocer"
   isActive     Boolean  @default(true) @map("is_active")
   sortOrder    Int      @default(0) @map("sort_order")
   createdAt    DateTime @default(now()) @map("created_at")

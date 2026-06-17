@@ -14,7 +14,7 @@ type AuthState = {
   logout: () => void;
 };
 
-const USER_KEY = "mascafi.user";
+const USER_KEY = "pocer.user";
 const Ctx = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

@@ -141,7 +141,7 @@ export default function AgentAccount() {
         <LogoutIcon size={18} /> Keluar
       </Button>
 
-      <p className="text-center text-[11px] text-dim">POCER · by penanggak.net</p>
+      <p className="text-center text-[11px] text-dim">POCER</p>
     </div>
   );
 }

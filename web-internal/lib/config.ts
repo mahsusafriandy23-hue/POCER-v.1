@@ -2,8 +2,8 @@ import type { Role } from "./api";
 
 /**
  * Which login surface this deployment exposes:
- *  - "agent" → only the Agen login (public surface, e.g. agen.mascafi…)
- *  - "owner" → only the Pemilik login (protected surface, e.g. admin.mascafi…)
+ *  - "agent" → only the Agen login (public surface, e.g. agen.pocer…)
+ *  - "owner" → only the Pemilik login (protected surface, e.g. admin.pocer…)
  *  - "both"  → role toggle shown (handy for local dev / single deploy)
  *
  * Set NEXT_PUBLIC_APP_MODE at build/deploy time. Defaults to "both".
